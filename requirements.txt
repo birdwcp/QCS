@@ -1,0 +1,8 @@
+numpy==1.21.6
+Pillow==9.3.0
+sklearn==0.0.post1
+matplotlib==3.5.3
+torch==1.13.0+cu117
+torchvision==0.14.0+cu117
+tqdm==4.64.1
+seaborn==0.12.2
