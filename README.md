@@ -38,7 +38,7 @@ AffectNet-7 | DCS | 67.29 | [link]
 AffectNet-7 | QCS | 66.91 | [link]
 
 ## Training
-You can directly run the `main_*_*.py` in PyCharm for training on each model and dataset. Or run as follows: python `main_*_*.py`. The default training parameters are set by `parser.add_argument()` in each `main_*_*.py`.
+You can directly run the `main_*_*.py` in PyCharm for training on each model and dataset. Or run as follows: `python main_*_*.py`. The default training parameters are set by `parser.add_argument()` in each `main_*_*.py`.
 
 You can continue your training by running `main_*_*.py` with only the need to set the `--resume` to `path/to/checkpoint`.
 ## Evaluation
