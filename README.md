@@ -62,7 +62,7 @@ python main_*_*.py --evaluate path/to/checkpoint
 ## Citation
 ```
 @inproceedings{Wang2024QCS,
-  title={QCS:Feature Refining from Quadruplet Cross Similarity\\for Facial Expression Recognition},
+  title={QCS:Feature Refining from Quadruplet Cross Similarity for Facial Expression Recognition},
   author={Chengpeng Wang, Li Chen, Lili Wang, Zhaofan Li, Xuebin Lv},
   journal={arXiv preprint arXiv:},
   year={2024}
