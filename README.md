@@ -38,12 +38,25 @@ AffectNet-7 | DCS | 67.29 | [link]
 AffectNet-7 | QCS | 66.91 | [link]
 
 ## Training
-You can directly run the `main_*_*.py` in PyCharm for training on each model and dataset. Or run as follows: `python main_*_*.py`. The default training parameters are set by `parser.add_argument()` in each `main_*_*.py`.
+The default training parameters are set by `parser.add_argument()` in each `main_*_*.py`.
 
-You can continue your training by running `main_*_*.py` with only the need to set the `--resume` to `path/to/checkpoint`.
+You can train the QCS or DCS models on each dataset, run as follows: 
+```
+python main_*_*.py --dataset (RAF-DB|FERPlus|AffectNet-7|AffectNet-8) --epochs (40|100|200) --batch-size (24|48)
+```
+
+
+
+You can continue your training, run as follows: 
+```
+python main_*_*.py --resume path/to/checkpoint
+```
+
 ## Evaluation
-You can evaluate our models by running `main_*_*.py` with only the need to set the `--evaluate` to `path/to/checkpoint`.
-
+You can evaluate our models , run as follows: 
+```
+python main_*_*.py --evaluate path/to/checkpoint
+```
 ## Citation
 ```
 @inproceedings{Wang2024QCS,
