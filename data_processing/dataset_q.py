@@ -36,9 +36,18 @@ def config(dataset):
     if dataset == 'FERPlus':
         train_root = '../datas/FERPlus/img'
         test_root = '../datas/FERPlus/img'
-        train_pd = pd.read_csv("../datas/FERPlus/ferplus_training.txt", sep=" ", header=None,
+        train_pd = pd.read_csv("../datas/FERPlus/ferplus_training-v2.txt", sep=" ", header=None,
                                names=['ImageName', 'label'], engine='python')
         test_pd = pd.read_csv("../datas/FERPlus/ferplus_test.txt", sep=" ", header=None,
+                              names=['ImageName', 'label'], engine='python')
+        cls_num = 8
+
+    if dataset == 'FERPlus+RAF-DB':
+        train_root = '../datas/'
+        test_root = '../datas/'
+        train_pd = pd.read_csv("../datas/FERPlus+RAF-DB/ferplus_raf_db_training.txt", sep=" ", header=None,
+                               names=['ImageName', 'label'], engine='python')
+        test_pd = pd.read_csv("../datas/FERPlus+RAF-DB/ferplus_raf_db_test.txt", sep=" ", header=None,
                               names=['ImageName', 'label'], engine='python')
         cls_num = 8
 

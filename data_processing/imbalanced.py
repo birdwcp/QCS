@@ -29,7 +29,7 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
         # define custom callback
         self.callback_get_label = callback_get_label
 
-        self.num_samples = len(dataset) // 8
+        self.num_samples = len(dataset) #// 2
         # if num_samples is not provided, draw `len(indices)` samples in each iteration
         #self.num_samples = len(self.indices) if num_samples is None else num_samples
 
