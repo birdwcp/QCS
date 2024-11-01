@@ -29,7 +29,7 @@ download the [RAF-DB](http://www.whdeng.cn/raf/model1.html), [FERPlus](https://g
 
 
 ## Checkpoints
-We provide the checkpoints with training logs in each dataset. 
+We provide the checkpoints with training logs in each dataset. The checkpoints trained in old version code are not temporarily provided due to network layers naming compatibility issues.
 dataset | Model | Acc. | Checkpoint & Log  
 --- |:---:|:---:|:---:|
 RAF-DB | DCS | 92.57 | [link]
