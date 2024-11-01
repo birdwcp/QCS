@@ -54,7 +54,7 @@ parser.add_argument('-p', '--print-freq', default=100, type=int, metavar='N', he
 parser.add_argument('--resume', default=None, type=str, metavar='PATH', help='path to checkpoint')
 parser.add_argument('-e', '--evaluate', default=None, type=str, help='evaluate model on test set')
 parser.add_argument('--beta', type=float, default=0.6)
-parser.add_argument('--gpu', type=str, default='2')
+parser.add_argument('--gpu', type=str, default='1')
 parser.add_argument('--num_classes', type=int, default=8)
 
 args = parser.parse_args()
@@ -68,7 +68,7 @@ def main():
 
 
     # create model
-    model = pyramid_trans_expr2(img_size=224, num_classes=args.num_classes)
+    model = pyramid_trans_expr(img_size=224, num_classes=args.num_classes)
 
     model = torch.nn.DataParallel(model).cuda()
 
@@ -88,7 +88,8 @@ def main():
     optimizer = SAM(model.parameters(), base_optimizer, lr=args.lr, rho=0.05, adaptive=False, )
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
     recorder = RecorderMeter_loss(args.epochs)
-    recorder1 = RecorderMeter1(args.epochs)
+    recorder_m = RecorderMeter_matrix(args.epochs)
+
 
     if args.resume:
         if os.path.isfile(args.resume):
@@ -97,7 +98,7 @@ def main():
             args.start_epoch = checkpoint['epoch']
             best_acc = checkpoint['best_acc']
             recorder = checkpoint['recorder']
-            recorder1 = checkpoint['recorder1']
+            recorder_m = checkpoint['recorder_m']
             best_acc = best_acc.to()
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
@@ -164,7 +165,7 @@ def main():
         scheduler.step()
 
         recorder.update(epoch, train_los_1, train_los_2, train_los_3, train_los_4)
-        recorder1.update(output, target)
+        recorder_m.update(output, target)
 
         curve_name = time_str + 'cnn.png'
         recorder.plot_curve(os.path.join('./log_ferplus/', curve_name))
@@ -177,6 +178,7 @@ def main():
 
         if is_best:
             matrix = D
+            recorder_m.plot_confusion_matrix(cm=matrix)
 
         print('Current best matrix: ', matrix)
 
@@ -188,7 +190,7 @@ def main():
                          'state_dict': model.state_dict(),
                          'best_acc': best_acc,
                          'optimizer': optimizer.state_dict(),
-                         'recorder1': recorder1,
+                         'recorder_m': recorder_m,
                          'recorder': recorder}, is_best, args)
 
 
@@ -413,22 +415,21 @@ class RecorderMeter_matrix(object):
         self.y_true = target
 
     def plot_confusion_matrix(self, cm):
+        D_ferplus_norm = [[x*100 / sum(sublist) for x in sublist] for sublist in cm]
+        D_ferplus_text = [['{:.1f}%'.format(x*100 / sum(sublist)) for x in sublist] for sublist in cm]
 
-        D_affect_norm = [[x / 5 for x in sublist] for sublist in cm]
-        D_affect_text = [['{:.1f}%'.format(x / 5) for x in sublist] for sublist in cm]
-
-        fig_affect, ax_affect = plt.subplots()
-        sns.heatmap(D_affect_norm, cmap='Blues', square=True, annot=D_affect_text, fmt='', cbar=False, ax=ax_affect,
+        fig_ferplus, ax_ferplus = plt.subplots()
+        sns.heatmap(D_ferplus_norm, cmap='Blues', square=True, annot=D_ferplus_text, fmt='', cbar=False, ax=ax_ferplus,
                     annot_kws={'size': 7, 'ha': 'center', 'va': 'center'})
 
-        x_labels_affect = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
-        y_labels_affect = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
-        ax_affect.set_xticklabels(x_labels_affect, fontsize=7)
-        ax_affect.set_yticklabels(y_labels_affect, fontsize=7)
-        ax_affect.set_xlabel('Predicted', fontsize=10)
-        ax_fer.set_ylabel('True', fontsize=10)
-        ax_fer.set_title('FERPlus', fontsize=12)
-        fig_affect.savefig('./log_ferplus/'+time_str+'-matrix.png', dpi=300)
+        x_labels_ferplus = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
+        y_labels_ferplus = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
+        ax_ferplus.set_xticklabels(x_labels_ferplus, fontsize=7)
+        ax_ferplus.set_yticklabels(y_labels_ferplus, fontsize=7)
+        ax_ferplus.set_xlabel('Predicted', fontsize=10)
+        ax_ferplus.set_ylabel('True', fontsize=10)
+        ax_ferplus.set_title('FERPlus', fontsize=12)
+        fig_ferplus.savefig('./log_ferplus/'+time_str+'-matrix.png', dpi=300)
 
         print('Saved matrix')
 
@@ -441,6 +442,7 @@ class RecorderMeter_matrix(object):
         # im_re_label.transpose()
         y_pred = im_pre_label.flatten()
         im_pre_label.transpose()
+
 
 
 class RecorderMeter_loss(object):

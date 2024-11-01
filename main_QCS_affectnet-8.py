@@ -54,7 +54,7 @@ parser.add_argument('-p', '--print-freq', default=100, type=int, metavar='N', he
 parser.add_argument('--resume', default=None, type=str, metavar='PATH', help='path to checkpoint')
 parser.add_argument('-e', '--evaluate', default=None, type=str, help='evaluate model on test set')
 parser.add_argument('--beta', type=float, default=0.6)
-parser.add_argument('--gpu', type=str, default='1')
+parser.add_argument('--gpu', type=str, default='2')
 parser.add_argument('--num_classes', type=int, default=8)
 
 args = parser.parse_args()
@@ -145,8 +145,8 @@ def main():
 
     for epoch in range(args.start_epoch, args.epochs):
 
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, sampler=ImbalancedDatasetSampler(train_dataset), num_workers=args.workers,
-                                  pin_memory=True, collate_fn=collate_fn)
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers,
+                                  pin_memory=True, collate_fn=collate_fn, sampler=ImbalancedDatasetSampler(train_dataset))
 
         current_learning_rate = optimizer.state_dict()['param_groups'][0]['lr']
         print('Current learning rate: ', current_learning_rate)

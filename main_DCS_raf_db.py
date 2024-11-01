@@ -88,7 +88,7 @@ def main():
     optimizer = SAM(model.parameters(), base_optimizer, lr=args.lr, rho=0.05, adaptive=False, )
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
     recorder = RecorderMeter_loss(args.epochs)
-    recorder1 = RecorderMeter1(args.epochs)
+    recorder_m = RecorderMeter_matrix(args.epochs)
 
     if args.resume:
         if os.path.isfile(args.resume):
@@ -97,7 +97,7 @@ def main():
             args.start_epoch = checkpoint['epoch']
             best_acc = checkpoint['best_acc']
             recorder = checkpoint['recorder']
-            recorder1 = checkpoint['recorder1']
+            recorder_m = checkpoint['recorder_m']
             best_acc = best_acc.to()
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
@@ -164,7 +164,7 @@ def main():
         scheduler.step()
 
         recorder.update(epoch, train_los_1, train_los_2, train_los_3, train_los_4)
-        recorder1.update(output, target)
+        recorder_m.update(output, target)
 
         curve_name = time_str + 'cnn.png'
         recorder.plot_curve(os.path.join('./log_raf_db/', curve_name))
@@ -188,7 +188,7 @@ def main():
                          'state_dict': model.state_dict(),
                          'best_acc': best_acc,
                          'optimizer': optimizer.state_dict(),
-                         'recorder1': recorder1,
+                         'recorder_m': recorder_m,
                          'recorder': recorder}, is_best, args)
 
 
@@ -327,11 +327,10 @@ def validate(val_loader, model, criterion, args):
     return top1.avg, losses.avg, output, target, D
 
 def save_checkpoint(state, is_best, args):
-
+    torch.save(state, args.checkpoint_path)
     if is_best:
-        torch.save(state, args.checkpoint_path)
-        best_state = state.pop('optimizer')
-        torch.save(best_state, args.best_checkpoint_path)
+        #best_state = state.pop('optimizer')
+        torch.save(state, args.best_checkpoint_path)
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
@@ -412,21 +411,20 @@ class RecorderMeter_matrix(object):
 
     def plot_confusion_matrix(self, cm):
 
-        D_affect_norm = [[x / 5 for x in sublist] for sublist in cm]
-        D_affect_text = [['{:.1f}%'.format(x / 5) for x in sublist] for sublist in cm]
+        D_raf_norm = [[x*100 / sum(sublist) for x in sublist] for sublist in cm]
+        D_raf_text = [['{:.1f}%'.format(x*100 / sum(sublist)) for x in sublist] for sublist in cm]
 
-        fig_affect, ax_affect = plt.subplots()
-        sns.heatmap(D_affect_norm, cmap='Blues', square=True, annot=D_affect_text, fmt='', cbar=False, ax=ax_affect,
+        fig_raf, ax_raf = plt.subplots()
+        sns.heatmap(D_raf_norm, cmap='Blues', square=True, annot=D_raf_text, fmt='', cbar=False, ax=ax_raf,
                     annot_kws={'size': 7, 'ha': 'center', 'va': 'center'})
 
-        x_labels_affect = ['Surprise', 'Fear', 'Disgust', 'Happy', 'Sad', 'Anger', 'Neutral']
-        y_labels_affect = ['Surprise', 'Fear', 'Disgust', 'Happy', 'Sad', 'Anger', 'Neutral']
-        ax_affect.set_xticklabels(x_labels_affect, fontsize=7)
-        ax_affect.set_yticklabels(y_labels_affect, fontsize=7)
-        ax_affect.set_xlabel('Predicted', fontsize=10)
+        x_labels_raf = ['Surprise', 'Fear', 'Disgust', 'Happy', 'Sad', 'Anger', 'Neutral']
+        y_labels_raf = ['Surprise', 'Fear', 'Disgust', 'Happy', 'Sad', 'Anger', 'Neutral']
+        ax_raf.set_xticklabels(x_labels_raf, fontsize=7)
+        ax_raf.set_yticklabels(y_labels_raf, fontsize=7)
+        ax_raf.set_xlabel('Predicted', fontsize=10)
         ax_raf.set_title('RAF-DB', fontsize=12)
-        fig_raf.savefig('matrix_raf.png', dpi=300)
-        fig_affect.savefig('./log_raf_db/'+time_str+'-matrix.png', dpi=300)
+        fig_raf.savefig('./log_raf_db/'+time_str+'-matrix.png', dpi=300)
 
         print('Saved matrix')
 

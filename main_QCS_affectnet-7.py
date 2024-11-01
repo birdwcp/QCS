@@ -42,19 +42,19 @@ parser.add_argument('--dataset', default='AffectNet-7', choices=['RAF-DB', 'Affe
 parser.add_argument('--checkpoint_path', type=str, default='./checkpoint_affect-7/' + time_str + 'model.pth')
 parser.add_argument('--best_checkpoint_path', type=str, default='./checkpoint_affect-7/' + time_str + 'model_best.pth')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N', help='number of data loading workers')
-parser.add_argument('--epochs', default=80, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=24, type=int, metavar='N')#144
+parser.add_argument('-b', '--batch-size', default=36, type=int, metavar='N')#144
 parser.add_argument('--optimizer', type=str, default="adam", help='Optimizer, adam or sgd.')
 
-parser.add_argument('--lr', '--learning-rate', default=0.000004, type=float, metavar='LR', dest='lr')
+parser.add_argument('--lr', '--learning-rate', default=0.0000035, type=float, metavar='LR', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M')
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float, metavar='W', dest='weight_decay')
 parser.add_argument('-p', '--print-freq', default=100, type=int, metavar='N', help='print frequency')
 parser.add_argument('--resume', default=None, type=str, metavar='PATH', help='path to checkpoint')
 parser.add_argument('-e', '--evaluate', default=None, type=str, help='evaluate model on test set')
 parser.add_argument('--beta', type=float, default=0.6)
-parser.add_argument('--gpu', type=str, default='1')
+parser.add_argument('--gpu', type=str, default='3')
 parser.add_argument('--num_classes', type=int, default=7)
 
 args = parser.parse_args()
@@ -115,7 +115,7 @@ def main():
             #transforms.RandomCrop((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.RandomErasing(scale=(0.04, 0.06))]),
+            transforms.RandomErasing(scale=(0.02, 0.1))]),
         'test': transforms.Compose([transforms.Resize((224, 224)),
             #transforms.CenterCrop((224, 224)),
             transforms.ToTensor(),

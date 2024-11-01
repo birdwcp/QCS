@@ -46,7 +46,7 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='man
 parser.add_argument('-b', '--batch-size', default=24, type=int, metavar='N')
 parser.add_argument('--optimizer', type=str, default="adam", help='Optimizer, adam or sgd.')
 
-parser.add_argument('--lr', '--learning-rate', default=0.000004, type=float, metavar='LR', dest='lr')
+parser.add_argument('--lr', '--learning-rate', default=0.000003, type=float, metavar='LR', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M')
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float, metavar='W', dest='weight_decay')
 parser.add_argument('-p', '--print-freq', default=100, type=int, metavar='N', help='print frequency')
@@ -67,7 +67,7 @@ def main():
 
 
     # create model
-    model = pyramid_trans_expr2(img_size=224, num_classes=args.num_classes)
+    model = pyramid_trans_expr(img_size=224, num_classes=args.num_classes)
 
     model = torch.nn.DataParallel(model).cuda()
 
@@ -147,6 +147,7 @@ def main():
     matrix = None
 
     for epoch in range(args.start_epoch, args.epochs):
+
 
         current_learning_rate = optimizer.state_dict()['param_groups'][0]['lr']
         print('Current learning rate: ', current_learning_rate)
@@ -430,22 +431,21 @@ class RecorderMeter_matrix(object):
         self.y_true = target
 
     def plot_confusion_matrix(self, cm):
+        D_ferplus_norm = [[x*100 / sum(sublist) for x in sublist] for sublist in cm]
+        D_ferplus_text = [['{:.1f}%'.format(x*100 / sum(sublist)) for x in sublist] for sublist in cm]
 
-        D_affect_norm = [[x / 5 for x in sublist] for sublist in cm]
-        D_affect_text = [['{:.1f}%'.format(x / 5) for x in sublist] for sublist in cm]
-
-        fig_affect, ax_affect = plt.subplots()
-        sns.heatmap(D_affect_norm, cmap='Blues', square=True, annot=D_affect_text, fmt='', cbar=False, ax=ax_affect,
+        fig_ferplus, ax_ferplus = plt.subplots()
+        sns.heatmap(D_ferplus_norm, cmap='Blues', square=True, annot=D_ferplus_text, fmt='', cbar=False, ax=ax_ferplus,
                     annot_kws={'size': 7, 'ha': 'center', 'va': 'center'})
 
-        x_labels_affect = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
-        y_labels_affect = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
-        ax_affect.set_xticklabels(x_labels_affect, fontsize=7)
-        ax_affect.set_yticklabels(y_labels_affect, fontsize=7)
-        ax_affect.set_xlabel('Predicted', fontsize=10)
-        ax_fer.set_ylabel('True', fontsize=10)
-        ax_fer.set_title('FERPlus', fontsize=12)
-        fig_affect.savefig('./log_ferplus/'+time_str+'-matrix.png', dpi=300)
+        x_labels_ferplus = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
+        y_labels_ferplus = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
+        ax_ferplus.set_xticklabels(x_labels_ferplus, fontsize=7)
+        ax_ferplus.set_yticklabels(y_labels_ferplus, fontsize=7)
+        ax_ferplus.set_xlabel('Predicted', fontsize=10)
+        ax_ferplus.set_ylabel('True', fontsize=10)
+        ax_ferplus.set_title('FERPlus', fontsize=12)
+        fig_ferplus.savefig('./log_ferplus/'+time_str+'-matrix.png', dpi=300)
 
         print('Saved matrix')
 
