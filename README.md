@@ -29,18 +29,18 @@ download the [RAF-DB](http://www.whdeng.cn/raf/model1.html), [FERPlus](https://g
 
 
 ## Checkpoints
-We provide the checkpoints with training logs in each dataset. The checkpoints trained in old version code are not temporarily provided due to network layers naming compatibility issues.
+We provide the checkpoints with training logs in each dataset. The checkpoints trained in old version code are not currently provided due to naming compatibility issues with network layers.
 dataset | Model | Acc. | Checkpoint & Log  
 --- |:---:|:---:|:---:|
 RAF-DB | DCS | 92.57 | [link]
 RAF-DB | QCS | 92.47 | [link]
-RAF-DB | QCS‡ | 92.83 | [link]
+RAF-DB | QCS‡ | 92.83 | [link](https://drive.google.com/drive/folders/1b25WkmbEqjC9dKsjIrGKUCxpywINjk5e?usp=sharing/)
 FERPlus | DCS | 91.25 | [link]
 FERPlus | QCS | 91.21 | [link]
 FERPlus | QCS‡ | 91.50 | [link]
 AffectNet-7 | DCS | 67.29 | [link]
 AffectNet-7 | QCS | 66.91 | [link]
-AffectNet-8 | QCS | 63.9 | [link]
+AffectNet-8 | QCS | 63.9 | [link](https://drive.google.com/drive/folders/1WFbisNzL-YqqMNSN0sq8vIaXYuh4_1Xm?usp=sharing/)
 
 ## Training
 The default training parameters are set by `parser.add_argument()` in each `main_*_*.py`.
