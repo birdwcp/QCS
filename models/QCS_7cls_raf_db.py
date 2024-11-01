@@ -22,6 +22,8 @@ def load_pretrained_weights(model, checkpoint):
         # keys would contain "module.", which should be ignored.
         if k.startswith('module.'):
             k = k[7:]
+        if k.startswith('ir_back.'):
+            k = k[8:]
         if k in model_dict and model_dict[k].size() == v.size():
             new_state_dict[k] = v
             matched_layers.append(k)
@@ -31,6 +33,7 @@ def load_pretrained_weights(model, checkpoint):
     model_dict.update(new_state_dict)
 
     model.load_state_dict(model_dict)
+
     print('load_weight', len(matched_layers))
     return model
 
@@ -175,11 +178,12 @@ class pyramid_trans_expr(nn.Module):
 
         self.num_classes = num_classes
 
-        self.VIT_base = VisionTransformer(depth=2, drop_ratio=0.2, embed_dim=embed_dim)
-        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.5, embed_dim=embed_dim)
+        self.VIT_base = VisionTransformer(depth=2, embed_dim=embed_dim)
+        self.VIT_cross = VisionTransformer(depth=1, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
-        ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
+        ir_checkpoint = torch.load(r'.\models\pretrain\QCS_affect-8.pth', map_location=lambda storage, loc: storage)
+        #ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
 
         self.ir_back = load_pretrained_weights(self.ir_back, ir_checkpoint)
 
@@ -241,14 +245,14 @@ class pyramid_trans_expr(nn.Module):
 
         '''----------------- attention ----------------'''
         _, N, _ = x_a_o1.shape
-        x_a1_1, x_a1_2, x_a1_3 = torch.split(x_a_0, [N, N, N], dim=1)
-        x_p1_1, x_p1_2, x_p1_3 = torch.split(x_p_0, [N, N, N], dim=1)
-        x_n1_1, x_n1_2, x_n1_3 = torch.split(x_n_0, [N, N, N], dim=1)
-        x_n2_1, x_n2_2, x_n2_3 = torch.split(x_n2_0, [N, N, N], dim=1)
+        x_a_0_1, x_a_0_2, x_a_0_3 = torch.split(x_a_0, [N, N, N], dim=1)
+        x_p_0_1, x_p_0_2, x_p_0_3 = torch.split(x_p_0, [N, N, N], dim=1)
+        x_n_0_1, x_n_0_2, x_n_0_3 = torch.split(x_n_0, [N, N, N], dim=1)
+        x_n2_0_1, x_n2_0_2, x_n2_0_3 = torch.split(x_n2_0, [N, N, N], dim=1)
 
-        attn_a1, attn_p1, attn_n_1, attn_n2_1, k1 = self.cross_attention_1(x_a1_1, x_p1_1, x_n1_1, x_n2_1)
-        attn_a2, attn_p2, attn_n_2, attn_n2_2, k2 = self.cross_attention_2(x_a1_2, x_p1_2, x_n1_2, x_n2_2)
-        attn_a3, attn_p3, attn_n_3, attn_n2_3, k3 = self.cross_attention_3(x_a1_3, x_p1_3, x_n1_3, x_n2_3)
+        attn_a1, attn_p1, attn_n_1, attn_n2_1, k1 = self.cross_attention_1(x_a_0_1, x_p_0_1, x_n_0_1, x_n2_0_1)
+        attn_a2, attn_p2, attn_n_2, attn_n2_2, k2 = self.cross_attention_2(x_a_0_2, x_p_0_2, x_n_0_2, x_n2_0_2)
+        attn_a3, attn_p3, attn_n_3, attn_n2_3, k3 = self.cross_attention_3(x_a_0_3, x_p_0_3, x_n_0_3, x_n2_0_3)
 
         attn_a_o = torch.cat([attn_a1, attn_a2, attn_a3], dim=1)
         attn_p_o = torch.cat([attn_p1, attn_p2, attn_p3], dim=1)
@@ -273,7 +277,7 @@ class pyramid_trans_expr(nn.Module):
 
 
 def compute_param_flop():
-    model = pyramid_trans_expr2()
+    model = pyramid_trans_expr()
     img = torch.rand(size=(1,3,224,224))
     flops, params = profile(model, inputs=(img,))
     print(f'flops:{flops/1000**3}G,params:{params/1000**2}M')

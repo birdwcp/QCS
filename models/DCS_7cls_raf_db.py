@@ -157,7 +157,7 @@ class pyramid_trans_expr(nn.Module):
         self.cross_attention_3 = CrossAttention(embed_dim)
 
 
-        self.fusion = Fusion(num_classes)
+        #self.fusion = Fusion(num_classes)
 
 
     def forward(self, x_a, x_p):
@@ -169,7 +169,7 @@ class pyramid_trans_expr(nn.Module):
         x_a_o1, x_a_o2, x_a_o3 = self.embed_q(x_a_ir1).flatten(2).transpose(1, 2), self.embed_k(x_a_ir2).flatten(2).transpose(1, 2), self.embed_v(x_a_ir3)
         #torch.Size([64, 49, 768]) torch.Size([64, 49, 768]) torch.Size([64, 49, 768])
         x_a_o = torch.cat([x_a_o1, x_a_o2, x_a_o3], dim=1)
-        x_a, x_a1 = self.VIT_base(x_a_o)
+        x_a, x_a_0 = self.VIT_base(x_a_o)
 
         if x_p == None:
             return x_a
@@ -179,25 +179,25 @@ class pyramid_trans_expr(nn.Module):
         x_p_ir1, x_p_ir2, x_p_ir3 = self.conv1(x_p_ir1), self.conv2(x_p_ir2), self.conv3(x_p_ir3)
         x_p_o1, x_p_o2, x_p_o3 = self.embed_q(x_p_ir1).flatten(2).transpose(1, 2), self.embed_k(x_p_ir2).flatten(2).transpose(1, 2), self.embed_v(x_p_ir3)
         x_p_o = torch.cat([x_p_o1, x_p_o2, x_p_o3], dim=1)
-        x_p, x_p1 = self.VIT_base(x_p_o)
+        x_p, x_p_0 = self.VIT_base(x_p_o)
 
         '''----------------- attention ----------------'''
         _, N, _ = x_a_o1.shape
-        x_a1_1, x_a1_2, x_a1_3 = torch.split(x_a1, [N, N, N], dim=1)
-        x_p1_1, x_p1_2, x_p1_3 = torch.split(x_p1, [N, N, N], dim=1)
+        x_a_0_1, x_a_0_2, x_a_0_3 = torch.split(x_a_0, [N, N, N], dim=1)
+        x_p_0_1, x_p_0_2, x_p_0_3 = torch.split(x_p_0, [N, N, N], dim=1)
 
-        attn_a1, attn_p1 = self.cross_attention_1(x_a1_1, x_p1_1)
-        attn_a2, attn_p2 = self.cross_attention_2(x_a1_2, x_p1_2)
-        attn_a3, attn_p3 = self.cross_attention_3(x_a1_3, x_p1_3)
+        attn_a1, attn_p1 = self.cross_attention_1(x_a_0_1, x_p_0_1)
+        attn_a2, attn_p2 = self.cross_attention_2(x_a_0_2, x_p_0_2)
+        attn_a3, attn_p3 = self.cross_attention_3(x_a_0_3, x_p_0_3)
 
         attn_a_o = torch.cat([attn_a1, attn_a2, attn_a3], dim=1)
         attn_p_o = torch.cat([attn_p1, attn_p2, attn_p3], dim=1)
 
         '''----------------- connection ----------------'''
-        x_a1 = x_a1 + attn_a_o
-        x_p1 = x_p1 + attn_p_o
-        out_a, _ = self.VIT_cross(x_a1)
-        out_p, _ = self.VIT_cross(x_p1)
+        x_a_0 = x_a_0 + attn_a_o
+        x_p_0 = x_p_0 + attn_p_o
+        out_a, _ = self.VIT_cross(x_a_0)
+        out_p, _ = self.VIT_cross(x_p_0)
         #out_a, out_p = self.fusion(x_a1, x_p1, attn_a_o, attn_p_o)
 
 

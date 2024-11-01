@@ -134,21 +134,27 @@ class CrossAttention(nn.Module):
 
 class Fusion(nn.Module):
 
-    def __init__(self, num_classes=8):
+    def __init__(self, num_classes=7):
         super().__init__()
 
         self.bilinear_pooling = Bilinear_Pooling()
         self.classifier = nn.Linear(768*768, num_classes)
 
-    def forward(self, x_a, x_p, attn_a, attn_p):
+    def forward(self, x_a, x_p, x_n, x_n2, attn_a, attn_p, attn_n, attn_n2):
+
         pooling_a = torch.flatten(self.bilinear_pooling(x_a, attn_a), 1)
         out_a = self.classifier(pooling_a)
 
-        pooling_b = torch.flatten(self.bilinear_pooling(x_p, attn_p), 1)
-        out_p = self.classifier(pooling_b)
+        pooling_p = torch.flatten(self.bilinear_pooling(x_p, attn_p), 1)
+        out_p = self.classifier(pooling_p)
 
-        return out_a, out_p
+        pooling_n = torch.flatten(self.bilinear_pooling(x_n, attn_n), 1)
+        out_n = self.classifier(pooling_n)
 
+        pooling_n2 = torch.flatten(self.bilinear_pooling(x_n2, attn_n2), 1)
+        out_n2 = self.classifier(pooling_n2)
+
+        return out_a, out_p, out_n, out_n2
 
 
 
@@ -161,8 +167,8 @@ class pyramid_trans_expr(nn.Module):
 
         self.num_classes = num_classes
 
-        self.VIT_base = VisionTransformer(depth=2, drop_ratio=0.2, embed_dim=embed_dim)
-        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.5, embed_dim=embed_dim)
+        self.VIT_base = VisionTransformer(depth=2, drop_ratio=0, embed_dim=embed_dim)
+        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.3, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
         ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
@@ -224,14 +230,14 @@ class pyramid_trans_expr(nn.Module):
 
         '''----------------- attention ----------------'''
         _, N, _ = x_a_o1.shape
-        x_a1_1, x_a1_2, x_a1_3 = torch.split(x_a_0, [N, N, N], dim=1)
-        x_p1_1, x_p1_2, x_p1_3 = torch.split(x_p_0, [N, N, N], dim=1)
-        x_n1_1, x_n1_2, x_n1_3 = torch.split(x_n_0, [N, N, N], dim=1)
-        x_n2_1, x_n2_2, x_n2_3 = torch.split(x_n2_0, [N, N, N], dim=1)
+        x_a_0_1, x_a_0_2, x_a_0_3 = torch.split(x_a_0, [N, N, N], dim=1)
+        x_p_0_1, x_p_0_2, x_p_0_3 = torch.split(x_p_0, [N, N, N], dim=1)
+        x_n_0_1, x_n_0_2, x_n_0_3 = torch.split(x_n_0, [N, N, N], dim=1)
+        x_n2_0_1, x_n2_0_2, x_n2_0_3 = torch.split(x_n2_0, [N, N, N], dim=1)
 
-        attn_a1, attn_p1, attn_n_1, attn_n2_1, k1 = self.cross_attention_1(x_a1_1, x_p1_1, x_n1_1, x_n2_1)
-        attn_a2, attn_p2, attn_n_2, attn_n2_2, k2 = self.cross_attention_2(x_a1_2, x_p1_2, x_n1_2, x_n2_2)
-        attn_a3, attn_p3, attn_n_3, attn_n2_3, k3 = self.cross_attention_3(x_a1_3, x_p1_3, x_n1_3, x_n2_3)
+        attn_a1, attn_p1, attn_n_1, attn_n2_1, k1 = self.cross_attention_1(x_a_0_1, x_p_0_1, x_n_0_1, x_n2_0_1)
+        attn_a2, attn_p2, attn_n_2, attn_n2_2, k2 = self.cross_attention_2(x_a_0_2, x_p_0_2, x_n_0_2, x_n2_0_2)
+        attn_a3, attn_p3, attn_n_3, attn_n2_3, k3 = self.cross_attention_3(x_a_0_3, x_p_0_3, x_n_0_3, x_n2_0_3)
 
         attn_a_o = torch.cat([attn_a1, attn_a2, attn_a3], dim=1)
         attn_p_o = torch.cat([attn_p1, attn_p2, attn_p3], dim=1)
@@ -239,6 +245,7 @@ class pyramid_trans_expr(nn.Module):
         attn_n2_o = torch.cat([attn_n2_1, attn_n2_2, attn_n2_3], dim=1)
 
         '''----------------- connection ----------------'''
+
         x_a_0 = x_a_0 + attn_a_o
         x_p_0 = x_p_0 + attn_p_o
         x_n_0 = x_n_0 + attn_n_o

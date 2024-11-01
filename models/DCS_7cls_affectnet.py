@@ -136,7 +136,7 @@ class pyramid_trans_expr(nn.Module):
         self.num_classes = num_classes
 
         self.VIT_base = VisionTransformer(depth=1, drop_ratio=0.1, embed_dim=embed_dim)
-        #self.VIT_2 = VisionTransformer(depth=1, drop_ratio=0.1, embed_dim=embed_dim)
+        #self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.1, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
         ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
@@ -184,12 +184,12 @@ class pyramid_trans_expr(nn.Module):
 
         '''----------------- attention ----------------'''
         _, N, _ = x_a_o1.shape
-        x_a1_1, x_a1_2, x_a1_3 = torch.split(x_a_0, [N, N, N], dim=1)
-        x_p1_1, x_p1_2, x_p1_3 = torch.split(x_p_0, [N, N, N], dim=1)
+        x_a_0_1, x_a_0_2, x_a_0_3 = torch.split(x_a_0, [N, N, N], dim=1)
+        x_p_0_1, x_p_0_2, x_p_0_3 = torch.split(x_p_0, [N, N, N], dim=1)
 
-        attn_a1, attn_p1 = self.cross_attention_1(x_a1_1, x_p1_1)
-        attn_a2, attn_p2 = self.cross_attention_2(x_a1_2, x_p1_2)
-        attn_a3, attn_p3 = self.cross_attention_3(x_a1_3, x_p1_3)
+        attn_a1, attn_p1 = self.cross_attention_1(x_a_0_1, x_p_0_1)
+        attn_a2, attn_p2 = self.cross_attention_2(x_a_0_2, x_p_0_2)
+        attn_a3, attn_p3 = self.cross_attention_3(x_a_0_3, x_p_0_3)
 
         attn_a_o = torch.cat([attn_a1, attn_a2, attn_a3], dim=1)
         attn_p_o = torch.cat([attn_p1, attn_p2, attn_p3], dim=1)
