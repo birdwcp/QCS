@@ -30,6 +30,7 @@ download the [RAF-DB](http://www.whdeng.cn/raf/model1.html), [FERPlus](https://g
 
 ## Checkpoints
 Our method obtains competitive results on AffectNet-7 and FERPlus when compared to Landmark-Aware methods, outperforming recent state-of-the-art methods on RAF-DB, without utilizing extra landmark information or other extra training data.
+
 We provide the checkpoints with training logs in each dataset. Some of the checkpoints that were trained in old version code are not currently provided due to naming compatibility issues with network layers. ‡ means pre-trained on the AffectNet-8.
 dataset | Model | Acc. | Checkpoint & Log  
 --- |:---:|:---:|:---:|
