@@ -35,8 +35,8 @@ dataset | Model | Acc. | Checkpoint & Log
 RAF-DB | DCS | 92.57 | [link](https://drive.google.com/file/d/1yPoWxsWnjyfT0Ymca4TwNmeNqVmz8GSC/view?usp=sharing)
 RAF-DB | QCS | 92.47 | [link](https://drive.google.com/file/d/1wZ5EvuZWjNpJcB009jjKSxGZ2_y1hiwd/view?usp=sharing)
 RAF-DB | QCS‡ | 92.83 | [link](https://drive.google.com/drive/folders/1b25WkmbEqjC9dKsjIrGKUCxpywINjk5e?usp=sharing/)
-FERPlus | DCS | 91.25 | [link]
-FERPlus | QCS | 91.21 | [link]
+FERPlus | DCS | 91.25 | [link](https://drive.google.com/drive/folders/1UoQ4xZYDGc0cooQd7BzhDfb58e3wwnjO?usp=sharing)
+FERPlus | QCS | 91.21 | [link](https://drive.google.com/drive/folders/19O9BjP7Lhd1DX9r8-RxSmvO1aAUQHoBO?usp=sharing)
 FERPlus | QCS‡ | 91.50 | [link]
 AffectNet-7 | DCS | 67.29 | [link](https://drive.google.com/file/d/1d5yOAEMNwNY3gTC-MRBXCrBuMYN3_Tsa/view?usp=sharing)
 AffectNet-7 | QCS | 66.91 | [link](https://drive.google.com/file/d/1XWf0q8wiJz840_ArXURFbv2KfdzVYwEV/view?usp=sharing)
