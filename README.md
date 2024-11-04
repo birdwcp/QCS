@@ -29,7 +29,7 @@ download the [RAF-DB](http://www.whdeng.cn/raf/model1.html), [FERPlus](https://g
 
 
 ## Checkpoints
-We provide the checkpoints with training logs in each dataset. Some of the checkpoints that were trained in old version code are not currently provided due to naming compatibility issues with network layers.
+We provide the checkpoints with training logs in each dataset. Some of the checkpoints that were trained in old version code are not currently provided due to naming compatibility issues with network layers. ‡ means pre-trained on the AffectNet-8.
 dataset | Model | Acc. | Checkpoint & Log  
 --- |:---:|:---:|:---:|
 RAF-DB | DCS | 92.57 | [link](https://drive.google.com/file/d/1yPoWxsWnjyfT0Ymca4TwNmeNqVmz8GSC/view?usp=sharing)
