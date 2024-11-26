@@ -42,7 +42,7 @@ FERPlus | QCS | 91.21 | [link](https://drive.google.com/drive/folders/19O9BjP7Lh
 FERPlus | QCS‡ | 91.50 | [link](https://drive.google.com/drive/folders/15jqH56e2dVtJx0oPzzcAmvaDAFa0rc01?usp=sharing)
 AffectNet-7 | DCS | 67.60 | [link](https://drive.google.com/file/d/1d5yOAEMNwNY3gTC-MRBXCrBuMYN3_Tsa/view?usp=sharing)
 AffectNet-7 | QCS | 66.91 | [link](https://drive.google.com/file/d/1XWf0q8wiJz840_ArXURFbv2KfdzVYwEV/view?usp=sharing)
-AffectNet-8 | QCS | 64.4 |
+AffectNet-8 | DCS | 64.4 |
 AffectNet-8 | QCS | 63.9 | [link](https://drive.google.com/drive/folders/1WFbisNzL-YqqMNSN0sq8vIaXYuh4_1Xm?usp=sharing/)
 
 ## Training
