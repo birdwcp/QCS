@@ -440,6 +440,7 @@ class RecorderMeter_matrix(object):
         ax_raf.set_xticklabels(x_labels_raf, fontsize=7)
         ax_raf.set_yticklabels(y_labels_raf, fontsize=7)
         ax_raf.set_xlabel('Predicted', fontsize=10)
+        ax_raf.set_ylabel('True', fontsize=10)
         ax_raf.set_title('RAF-DB', fontsize=12)
         fig_raf.savefig('./log_raf_db/'+time_str+'-matrix.png', dpi=300)
 
