@@ -22,8 +22,8 @@ import numpy as np
 import datetime
 from models.QCS_7cls_affectnet import *
 from data_processing.sam import SAM
-from data_processing.dataset_q import Dataset, collate_fn, config
-from data_processing.imbalanced_q import ImbalancedDatasetSampler
+from data_processing.dataset_q1 import Dataset, collate_fn, config
+from data_processing.imbalanced_q1 import ImbalancedDatasetSampler
 from torch.utils.data import DataLoader
 from utils import *
 from torch.utils.checkpoint import checkpoint
@@ -42,12 +42,12 @@ parser.add_argument('--dataset', default='AffectNet-7', choices=['RAF-DB', 'Affe
 parser.add_argument('--checkpoint_path', type=str, default='./checkpoint_affect-7/' + time_str + 'model.pth')
 parser.add_argument('--best_checkpoint_path', type=str, default='./checkpoint_affect-7/' + time_str + 'model_best.pth')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N', help='number of data loading workers')
-parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('--epochs', default=150, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=36, type=int, metavar='N')#144
+parser.add_argument('-b', '--batch-size', default=24, type=int, metavar='N')#144
 parser.add_argument('--optimizer', type=str, default="adam", help='Optimizer, adam or sgd.')
 
-parser.add_argument('--lr', '--learning-rate', default=0.0000035, type=float, metavar='LR', dest='lr')
+parser.add_argument('--lr', '--learning-rate', default=0.000004, type=float, metavar='LR', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M')
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float, metavar='W', dest='weight_decay')
 parser.add_argument('-p', '--print-freq', default=100, type=int, metavar='N', help='print frequency')
@@ -110,14 +110,17 @@ def main():
 
     train_root, test_root, train_pd, test_pd, cls_num = config(dataset=args.dataset)
     data_transforms = {
-        'train': transforms.Compose([transforms.Resize((224, 224)),
+        'train': transforms.Compose([transforms.Resize((236, 236)),
             transforms.RandomHorizontalFlip(),
-            #transforms.RandomCrop((224, 224)),
+            transforms.RandomRotation(12),
+            transforms.RandomCrop((224, 224)),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.RandomErasing(scale=(0.02, 0.1))]),
-        'test': transforms.Compose([transforms.Resize((224, 224)),
-            #transforms.CenterCrop((224, 224)),
+            transforms.RandomErasing(scale=(0.03, 0.1))]),
+
+        'test': transforms.Compose([transforms.Resize((236, 236)),
+            transforms.CenterCrop((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]),
     }
@@ -166,7 +169,7 @@ def main():
 
         scheduler.step()
 
-        recorder.update(epoch, train_los_1, train_los_2, train_los_3, train_los_4)
+        #recorder.update(epoch, train_los_1, train_los_2, train_los_3, train_los_4)
         recorder_m.update(output, target)
 
         curve_name = time_str + 'cnn.png'
@@ -465,6 +468,7 @@ class RecorderMeter_matrix(object):
 
 
 
+
 class RecorderMeter_loss(object):
     """Computes and stores the minimum loss value and its epoch index"""
 
@@ -488,10 +492,10 @@ class RecorderMeter_loss(object):
         self.current_epoch = idx + 1
 
     def plot_curve(self, save_path):
-        title = 'the losses curve of train'
+        title = 'training losses curve'
         dpi = 80
         width, height = 1800, 1600
-        legend_fontsize = 20
+        legend_fontsize = 35
         figsize = width / float(dpi), height / float(dpi)
 
         fig = plt.figure(figsize=figsize)
@@ -499,38 +503,39 @@ class RecorderMeter_loss(object):
         y_axis = np.zeros(self.total_epoch)
 
         plt.xlim(0, self.total_epoch)
-        plt.ylim(0, 0.15)
-        interval_y = 0.005
-        interval_x = 10
-        plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x))
-        plt.yticks(np.arange(0, 0.15 + interval_y, interval_y))
+        plt.ylim(0, 2.0)
+        interval_y = 0.1
+        interval_x = 4
+        plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x), fontsize=15)
+        plt.yticks(np.arange(0, 2.0 + interval_y, interval_y), fontsize=15)
         plt.grid()
-        plt.title(title, fontsize=20)
-        plt.xlabel('the training epoch', fontsize=16)
-        plt.ylabel('loss', fontsize=16)
+        plt.title(title, fontsize=40)
+        plt.xlabel('epoch', fontsize=35)
+        plt.ylabel('loss', fontsize=35)
 
         y_axis[:] = self.epoch_losses[:, 0]
-        plt.plot(x_axis, y_axis, color='r', linestyle='-', label='loss_base_a', lw=2)
+        plt.plot(x_axis, y_axis, color='r', linestyle='-', label='loss_base_a', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
         y_axis[:] = self.epoch_losses[:, 1]
-        plt.plot(x_axis, y_axis, color='g', linestyle='-', label='loss_base_p', lw=2)
+        plt.plot(x_axis, y_axis, color='g', linestyle='-', label='loss_base_p', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
         y_axis[:] = self.epoch_losses[:, 2]
-        plt.plot(x_axis, y_axis, color='b', linestyle='-', label='loss_cross_a', lw=2)
+        plt.plot(x_axis, y_axis, color='b', linestyle='-', label='loss_cross_a', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
         y_axis[:] = self.epoch_losses[:, 3]
-        plt.plot(x_axis, y_axis, color='y', linestyle='-', label='loss_cross_p', lw=2)
+        plt.plot(x_axis, y_axis, color='y', linestyle='-', label='loss_cross_p', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
+
+
 
 
         if save_path is not None:
             fig.savefig(save_path, dpi=dpi, bbox_inches='tight')
             print('Saved figure')
         plt.close(fig)
-
 
 
 

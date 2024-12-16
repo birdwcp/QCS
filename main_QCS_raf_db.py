@@ -22,7 +22,7 @@ import numpy as np
 import datetime
 from models.QCS_7cls_raf_db import *
 from data_processing.sam import SAM
-from data_processing.dataset_q import Dataset, collate_fn, config
+from data_processing.dataset_q0 import Dataset, collate_fn, config
 from torch.utils.data import DataLoader
 from utils import *
 from torch.utils.checkpoint import checkpoint
@@ -46,14 +46,14 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='man
 parser.add_argument('-b', '--batch-size', default=24, type=int, metavar='N')
 parser.add_argument('--optimizer', type=str, default="adam", help='Optimizer, adam or sgd.')
 
-parser.add_argument('--lr', '--learning-rate', default=0.0000035, type=float, metavar='LR', dest='lr')
+parser.add_argument('--lr', '--learning-rate', default=0.000003, type=float, metavar='LR', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M')
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float, metavar='W', dest='weight_decay')
 parser.add_argument('-p', '--print-freq', default=100, type=int, metavar='N', help='print frequency')
 parser.add_argument('--resume', default=None, type=str, metavar='PATH', help='path to checkpoint')
 parser.add_argument('-e', '--evaluate', default=None, type=str, help='evaluate model on test set')
 parser.add_argument('--beta', type=float, default=0.6)
-parser.add_argument('--gpu', type=str, default='2')
+parser.add_argument('--gpu', type=str, default='1')
 parser.add_argument('--num_classes', type=int, default=7)
 
 args = parser.parse_args()
@@ -108,18 +108,37 @@ def main():
     # Data loading code
 
     train_root, test_root, train_pd, test_pd, cls_num = config(dataset=args.dataset)
+
     data_transforms = {
         'train': transforms.Compose([transforms.Resize((224, 224)),
             transforms.RandomHorizontalFlip(),
-            #transforms.RandomCrop((224, 224)),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.RandomErasing(scale=(0.02, 0.1))]),
         'test': transforms.Compose([transforms.Resize((224, 224)),
-            #transforms.CenterCrop((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]),
     }
+    '''
+    data_transforms = {
+        'train': transforms.Compose([transforms.Resize((232, 232)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(8),
+            transforms.RandomCrop((224, 224)),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.RandomErasing(scale=(0.02, 0.1))]),
+
+        'test': transforms.Compose([transforms.Resize((232, 232)),
+            transforms.CenterCrop((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]),
+    }
+    '''
+
+
 
     train_dataset = Dataset(train_root, train_pd, train=True, transform=data_transforms['train'], num_positive=1, num_negative=1)
     test_dataset = Dataset(test_root, test_pd, train=False, transform=data_transforms['test'])
@@ -487,7 +506,7 @@ class RecorderMeter_loss(object):
         title = 'the losses curve of train'
         dpi = 80
         width, height = 1800, 1600
-        legend_fontsize = 20
+        legend_fontsize = 35
         figsize = width / float(dpi), height / float(dpi)
 
         fig = plt.figure(figsize=figsize)
@@ -495,30 +514,30 @@ class RecorderMeter_loss(object):
         y_axis = np.zeros(self.total_epoch)
 
         plt.xlim(0, self.total_epoch)
-        plt.ylim(0, 0.15)
+        plt.ylim(0, 0.3)
         interval_y = 0.005
         interval_x = 10
-        plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x))
-        plt.yticks(np.arange(0, 0.15 + interval_y, interval_y))
+        plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x), fontsize=15)
+        plt.yticks(np.arange(0, 0.3 + interval_y, interval_y), fontsize=15)
         plt.grid()
-        plt.title(title, fontsize=20)
-        plt.xlabel('the training epoch', fontsize=16)
-        plt.ylabel('loss', fontsize=16)
+        plt.title(title, fontsize=40)
+        plt.xlabel('the training epoch', fontsize=35)
+        plt.ylabel('loss', fontsize=35)
 
         y_axis[:] = self.epoch_losses[:, 0]
-        plt.plot(x_axis, y_axis, color='r', linestyle='-', label='loss_base_a', lw=2)
+        plt.plot(x_axis, y_axis, color='r', linestyle='-', label='loss_base_a', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
         y_axis[:] = self.epoch_losses[:, 1]
-        plt.plot(x_axis, y_axis, color='g', linestyle='-', label='loss_base_p', lw=2)
+        plt.plot(x_axis, y_axis, color='g', linestyle='-', label='loss_base_p', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
         y_axis[:] = self.epoch_losses[:, 2]
-        plt.plot(x_axis, y_axis, color='b', linestyle='-', label='loss_cross_a', lw=2)
+        plt.plot(x_axis, y_axis, color='b', linestyle='-', label='loss_cross_a', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
         y_axis[:] = self.epoch_losses[:, 3]
-        plt.plot(x_axis, y_axis, color='y', linestyle='-', label='loss_cross_p', lw=2)
+        plt.plot(x_axis, y_axis, color='y', linestyle='-', label='loss_cross_p', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
 

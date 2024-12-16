@@ -42,7 +42,7 @@ parser.add_argument('--dataset', default='AffectNet-7', choices=['RAF-DB', 'Affe
 parser.add_argument('--checkpoint_path', type=str, default='./checkpoint_affect-7/' + time_str + 'model.pth')
 parser.add_argument('--best_checkpoint_path', type=str, default='./checkpoint_affect-7/' + time_str + 'model_best.pth')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N', help='number of data loading workers')
-parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('--epochs', default=100, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=48, type=int, metavar='N')
 parser.add_argument('--optimizer', type=str, default="adam", help='Optimizer, adam or sgd.')
@@ -51,10 +51,10 @@ parser.add_argument('--lr', '--learning-rate', default=0.000009, type=float, met
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M')
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float, metavar='W', dest='weight_decay')
 parser.add_argument('-p', '--print-freq', default=100, type=int, metavar='N', help='print frequency')
-parser.add_argument('--resume', default=None, type=str, metavar='PATH', help='path to checkpoint')
+parser.add_argument('--resume', default="./checkpoint_affect-7/[11-29]-[10-32]-model.pth", type=str, metavar='PATH', help='path to checkpoint')
 parser.add_argument('-e', '--evaluate', default=None, type=str, help='evaluate model on test set')
 parser.add_argument('--beta', type=float, default=0.6)
-parser.add_argument('--gpu', type=str, default='3')
+parser.add_argument('--gpu', type=str, default='1')
 parser.add_argument('--num_classes', type=int, default=7)
 
 args = parser.parse_args()
@@ -68,7 +68,7 @@ def main():
 
 
     # create model
-    model = pyramid_trans_expr2(img_size=224, num_classes=args.num_classes)
+    model = pyramid_trans_expr(img_size=224, num_classes=args.num_classes)
 
     model = torch.nn.DataParallel(model).cuda()
 
@@ -110,19 +110,22 @@ def main():
 
     train_root, test_root, train_pd, test_pd, cls_num = config(dataset=args.dataset)
     data_transforms = {
-        'train': transforms.Compose([transforms.Resize((224, 224)),
+        'train': transforms.Compose([transforms.Resize((236, 236)),
             transforms.RandomHorizontalFlip(),
-            #transforms.RandomCrop((224, 224)),
+            transforms.RandomRotation(12),
+            transforms.RandomCrop((224, 224)),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.RandomErasing(scale=(0.02, 0.05))]),
-        'test': transforms.Compose([transforms.Resize((224, 224)),
-            #transforms.CenterCrop((224, 224)),
+            transforms.RandomErasing(scale=(0.03, 0.1))]),
+
+        'test': transforms.Compose([transforms.Resize((236, 236)),
+            transforms.CenterCrop((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]),
     }
 
-    train_dataset = Dataset(train_root, train_pd, train=True, transform=data_transforms['train'], num_positive=1, num_negative=1)
+    train_dataset = Dataset(train_root, train_pd, train=True, transform=data_transforms['train'], num_positive=1)
     test_dataset = Dataset(test_root, test_pd, train=False, transform=data_transforms['test'])
 
 
@@ -269,7 +272,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         if i % args.print_freq == 0:
             progress.display(i)
 
-    return losses_1.avg, losses_2.avg, losses_3.avg, losses_4.avg, losses.avg
+    return losses_1.avg, losses_2.avg, losses_3.avg, losses_4.avg
 
 
 def validate(val_loader, model, criterion, args):
@@ -473,7 +476,7 @@ class RecorderMeter_loss(object):
         title = 'training losses curve'
         dpi = 80
         width, height = 1800, 1600
-        legend_fontsize = 24
+        legend_fontsize = 35
         figsize = width / float(dpi), height / float(dpi)
 
         fig = plt.figure(figsize=figsize)
@@ -481,15 +484,15 @@ class RecorderMeter_loss(object):
         y_axis = np.zeros(self.total_epoch)
 
         plt.xlim(0, self.total_epoch)
-        plt.ylim(0, 1.0)
-        interval_y = 0.05
-        interval_x = 2
-        plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x))
-        plt.yticks(np.arange(0, 1.0 + interval_y, interval_y))
+        plt.ylim(0, 2.0)
+        interval_y = 0.1
+        interval_x = 4
+        plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x), fontsize=15)
+        plt.yticks(np.arange(0, 2.0 + interval_y, interval_y), fontsize=15)
         plt.grid()
-        plt.title(title, fontsize=26)
-        plt.xlabel('epoch', fontsize=20)
-        plt.ylabel('loss', fontsize=20)
+        plt.title(title, fontsize=40)
+        plt.xlabel('epoch', fontsize=35)
+        plt.ylabel('loss', fontsize=35)
 
         y_axis[:] = self.epoch_losses[:, 0]
         plt.plot(x_axis, y_axis, color='r', linestyle='-', label='loss_base_a', lw=3)
@@ -507,16 +510,13 @@ class RecorderMeter_loss(object):
         plt.plot(x_axis, y_axis, color='y', linestyle='-', label='loss_cross_p', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
-        #y_axis[:] = self.epoch_losses[:, 4]
-        #plt.plot(x_axis, y_axis, color='k', linestyle=':', label='train_loss_avg', lw=2)
-        #plt.legend(loc=1, fontsize=legend_fontsize)
+
 
 
         if save_path is not None:
             fig.savefig(save_path, dpi=dpi, bbox_inches='tight')
             print('Saved figure')
         plt.close(fig)
-
 
 
 

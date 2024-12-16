@@ -20,9 +20,10 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 import numpy as np
 import datetime
-from models.QCS_8cls_ferplus import *
+from models.DCS_8cls_affectnet import *
 from data_processing.sam import SAM
-from data_processing.dataset_q0 import Dataset, collate_fn, config
+from data_processing.dataset import Dataset, collate_fn, config
+from data_processing.imbalanced import ImbalancedDatasetSampler
 from torch.utils.data import DataLoader
 from utils import *
 from torch.utils.checkpoint import checkpoint
@@ -36,24 +37,23 @@ now = datetime.datetime.now()
 time_str = now.strftime("[%m-%d]-[%H-%M]-")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', default='FERPlus', choices=['RAF-DB', 'AffectNet-7', 'FERPlus', 'AffectNet-8'],
+parser.add_argument('--dataset', default='AffectNet-8', choices=['RAF-DB', 'AffectNet-7', 'FERPlus', 'AffectNet-8'],
                         type=str, help='dataset option')
-parser.add_argument('--checkpoint_path', type=str, default='./checkpoint_ferplus/' + time_str + 'model.pth')
-parser.add_argument('--best_checkpoint_path', type=str, default='./checkpoint_ferplus/' + time_str + 'model_best.pth')
+parser.add_argument('--checkpoint_path', type=str, default='./checkpoint_affect-8/' + time_str + 'model.pth')
+parser.add_argument('--best_checkpoint_path', type=str, default='./checkpoint_affect-8/' + time_str + 'model_best.pth')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N', help='number of data loading workers')
-parser.add_argument('--epochs', default=150, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('--epochs', default=50, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=24, type=int, metavar='N')
+parser.add_argument('-b', '--batch-size', default=48, type=int, metavar='N')
 parser.add_argument('--optimizer', type=str, default="adam", help='Optimizer, adam or sgd.')
-
-parser.add_argument('--lr', '--learning-rate', default=0.0000035, type=float, metavar='LR', dest='lr')
+parser.add_argument('--lr', '--learning-rate', default=0.000008, type=float, metavar='LR', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M')
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float, metavar='W', dest='weight_decay')
 parser.add_argument('-p', '--print-freq', default=100, type=int, metavar='N', help='print frequency')
 parser.add_argument('--resume', default=None, type=str, metavar='PATH', help='path to checkpoint')
 parser.add_argument('-e', '--evaluate', default=None, type=str, help='evaluate model on test set')
 parser.add_argument('--beta', type=float, default=0.6)
-parser.add_argument('--gpu', type=str, default='1')
+parser.add_argument('--gpu', type=str, default='2')
 parser.add_argument('--num_classes', type=int, default=8)
 
 args = parser.parse_args()
@@ -108,7 +108,6 @@ def main():
     # Data loading code
 
     train_root, test_root, train_pd, test_pd, cls_num = config(dataset=args.dataset)
-    '''
     data_transforms = {
         'train': transforms.Compose([transforms.Resize((224, 224)),
             transforms.RandomHorizontalFlip(),
@@ -121,28 +120,11 @@ def main():
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]),
     }
-    '''
-    data_transforms = {
-
-        'train': transforms.Compose([transforms.Resize((232, 232)),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(10),
-            transforms.RandomCrop((224, 224)),
-            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.RandomErasing(scale=(0.02, 0.1))]),
-
-        'test': transforms.Compose([transforms.Resize((232, 232)),
-            transforms.CenterCrop((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]),
-    }
 
     train_dataset = Dataset(train_root, train_pd, train=True, transform=data_transforms['train'], num_positive=1, num_negative=1)
     test_dataset = Dataset(test_root, test_pd, train=False, transform=data_transforms['test'])
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True, collate_fn=collate_fn)
+    #train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True, collate_fn=collate_fn)
     val_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, pin_memory=True)
 
 
@@ -166,10 +148,12 @@ def main():
 
     for epoch in range(args.start_epoch, args.epochs):
 
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, sampler=ImbalancedDatasetSampler(train_dataset), num_workers=args.workers,
+                                  pin_memory=True, collate_fn=collate_fn)
 
         current_learning_rate = optimizer.state_dict()['param_groups'][0]['lr']
         print('Current learning rate: ', current_learning_rate)
-        txt_name = './log_ferplus/' + time_str + 'log.txt'
+        txt_name = './log_affect-8/' + time_str + 'log.txt'
         with open(txt_name, 'a') as f:
             f.write('Current learning rate: ' + str(current_learning_rate) + '\n')
 
@@ -185,7 +169,7 @@ def main():
         recorder_m.update(output, target)
 
         curve_name = time_str + 'cnn.png'
-        recorder.plot_curve(os.path.join('./log_ferplus/', curve_name))
+        recorder.plot_curve(os.path.join('./log_affect-8/', curve_name))
 
         # remember best acc and save checkpoint
         is_best = val_acc > best_acc
@@ -199,7 +183,7 @@ def main():
 
         print('Current best matrix: ', matrix)
 
-        txt_name = './log_ferplus/' + time_str + 'log.txt'
+        txt_name = './log_affect-8/' + time_str + 'log.txt'
         with open(txt_name, 'a') as f:
             f.write('Current best accuracy: ' + str(best_acc.item()) + '\n')
 
@@ -218,11 +202,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     losses_2 = AverageMeter('Loss_2', ':.5f')
     losses_3 = AverageMeter('Loss_3', ':.5f')
     losses_4 = AverageMeter('Loss_4', ':.5f')
-    ks_1 = AverageMeter('k1', ':.5f')
-    ks_2 = AverageMeter('k2', ':.5f')
-    ks_3 = AverageMeter('k3', ':.5f')
     progress = ProgressMeter(len(train_loader),
-                             [losses, top1, losses_1, losses_2, losses_3, losses_4, ks_1, ks_2, ks_3],
+                             [losses, top1, losses_1, losses_2, losses_3, losses_4],
                              prefix="Epoch: [{}]".format(epoch))
 
     # switch to train mode
@@ -230,29 +211,23 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
     for i, data in enumerate(train_loader):
 
-        anchor_image, positive_image, negative_image, negative_image2, label, neg_label = data
+        anchor_image, positive_image, label = data
         #print(image.shape)
         anchor_image = anchor_image.cuda()
         positive_image = positive_image.cuda()
-        negative_image = negative_image.cuda()
-        negative_image2 = negative_image2.cuda()
         label = torch.Tensor(label).type(torch.int64).cuda()
-        neg_label = torch.Tensor(neg_label).type(torch.int64).cuda()
+        #neg_label = torch.Tensor(neg_label).type(torch.int64).cuda()
 
         '''----------------------  first_step  ----------------------'''
         # compute output
-        output1, output2, output3, output4, output5, output6, output7, output8, k1, k2, k3 = model(anchor_image, positive_image, negative_image, negative_image2)
+        output1, output2, output3, output4 = model(anchor_image, positive_image)
 
         loss1 = criterion(output1, label)
         loss2 = criterion(output2, label)
-        loss3 = criterion(output3, neg_label)
-        loss4 = criterion(output4, neg_label)
-        loss5 = criterion(output5, label)
-        loss6 = criterion(output6, label)
-        loss7 = criterion(output7, neg_label)
-        loss8 = criterion(output8, neg_label)
+        loss3 = criterion(output3, label)
+        loss4 = criterion(output4, label)
 
-        loss = (loss1 + loss2 + loss3 + loss4 + loss5 + loss6 + loss7 + loss8) / 8
+        loss = (loss1 + loss2 + loss3 + loss4) / 4
 
         # measure accuracy and record loss
         acc1, _ = accuracy(output1, label, topk=(1, 5))
@@ -267,18 +242,14 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         '''----------------------  second_step  ----------------------'''
 
-        output1, output2, output3, output4, output5, output6, output7, output8, k1, k2, k3 = model(anchor_image, positive_image, negative_image, negative_image2)
+        output1, output2, output3, output4 = model(anchor_image, positive_image)
 
         loss1 = criterion(output1, label)
         loss2 = criterion(output2, label)
-        loss3 = criterion(output3, neg_label)
-        loss4 = criterion(output4, neg_label)
-        loss5 = criterion(output5, label)
-        loss6 = criterion(output6, label)
-        loss7 = criterion(output7, neg_label)
-        loss8 = criterion(output8, neg_label)
+        loss3 = criterion(output3, label)
+        loss4 = criterion(output4, label)
 
-        loss = (loss1 + loss2 + loss3 + loss4 + loss5 + loss6 + loss7 + loss8) / 8
+        loss = (loss1 + loss2 + loss3 + loss4) / 4
 
         # measure accuracy and record loss
         acc1, _ = accuracy(output1, label, topk=(1, 5))
@@ -287,11 +258,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         '----------loss-----------'
         losses_1.update(loss1.item(), anchor_image.size(0))
         losses_2.update(loss2.item(), anchor_image.size(0))
-        losses_3.update(loss5.item(), anchor_image.size(0))
-        losses_4.update(loss6.item(), anchor_image.size(0))
-        ks_1.update(k1.item(), anchor_image.size(0))
-        ks_2.update(k2.item(), anchor_image.size(0))
-        ks_3.update(k3.item(), anchor_image.size(0))
+        losses_3.update(loss3.item(), anchor_image.size(0))
+        losses_4.update(loss4.item(), anchor_image.size(0))
         # compute gradient and do SGD step
         #optimizer.zero_grad()
         loss.backward()
@@ -325,7 +293,7 @@ def validate(val_loader, model, criterion, args):
         for i, (images, target) in enumerate(val_loader):
             images = images.cuda()
             target = target.cuda()
-            output = model(images, None, None, None)
+            output = model(images, None)
             loss = criterion(output, target)
 
             # measure accuracy and record loss
@@ -359,7 +327,7 @@ def validate(val_loader, model, criterion, args):
                 progress.display(i)
 
         print(' **** Accuracy {top1.avg:.3f} *** '.format(top1=top1))
-        with open('./log_ferplus/' + time_str + 'log.txt', 'a') as f:
+        with open('./log_affect-8/' + time_str + 'log.txt', 'a') as f:
             f.write(' * Accuracy {top1.avg:.3f}'.format(top1=top1) + '\n')
     print(D)
     return top1.avg, losses.avg, output, target, D
@@ -406,7 +374,7 @@ class ProgressMeter(object):
         entries += [str(meter) for meter in self.meters]
         print_txt = '\t'.join(entries)
         print(print_txt)
-        txt_name = './log_ferplus/' + time_str + 'log.txt'
+        txt_name = './log_affect-8/' + time_str + 'log.txt'
         with open(txt_name, 'a') as f:
             f.write(print_txt + '\n')
 
@@ -449,23 +417,25 @@ class RecorderMeter_matrix(object):
         self.y_true = target
 
     def plot_confusion_matrix(self, cm):
-        D_ferplus_norm = [[x*100 / sum(sublist) for x in sublist] for sublist in cm]
-        D_ferplus_text = [['{:.1f}%'.format(x*100 / sum(sublist)) for x in sublist] for sublist in cm]
 
-        fig_ferplus, ax_ferplus = plt.subplots()
-        sns.heatmap(D_ferplus_norm, cmap='Blues', square=True, annot=D_ferplus_text, fmt='', cbar=False, ax=ax_ferplus,
+        D_affect_norm = [[x / 5 for x in sublist] for sublist in cm]
+        D_affect_text = [['{:.1f}%'.format(x / 5) for x in sublist] for sublist in cm]
+
+        fig_affect, ax_affect = plt.subplots()
+        sns.heatmap(D_affect_norm, cmap='Blues', square=True, annot=D_affect_text, fmt='', cbar=False, ax=ax_affect,
                     annot_kws={'size': 7, 'ha': 'center', 'va': 'center'})
 
-        x_labels_ferplus = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
-        y_labels_ferplus = ['Neutral', 'Happy', 'Surprise', 'Sad', 'Anger', 'Disgust', 'Fear', 'Contempt']
-        ax_ferplus.set_xticklabels(x_labels_ferplus, fontsize=7)
-        ax_ferplus.set_yticklabels(y_labels_ferplus, fontsize=7)
-        ax_ferplus.set_xlabel('Predicted', fontsize=10)
-        ax_ferplus.set_ylabel('True', fontsize=10)
-        ax_ferplus.set_title('FERPlus', fontsize=12)
-        fig_ferplus.savefig('./log_ferplus/'+time_str+'-matrix.png', dpi=300)
+        x_labels_affect = ['Neutral', 'Happy', 'Sad', 'Surprise', 'Fear', 'Disgust', 'Anger', 'Contempt']
+        y_labels_affect = ['Neutral', 'Happy', 'Sad', 'Surprise', 'Fear', 'Disgust', 'Anger', 'Contempt']
+        ax_affect.set_xticklabels(x_labels_affect, fontsize=7)
+        ax_affect.set_yticklabels(y_labels_affect, fontsize=7)
+        ax_affect.set_xlabel('Predicted', fontsize=10)
+        ax_affect.set_ylabel('True', fontsize=10)
+        ax_affect.set_title('AffectNet-8', fontsize=12)
+        fig_affect.savefig('./log_affect-8/'+time_str+'-matrix.png', dpi=300)
 
         print('Saved matrix')
+
 
     def matrix(self):
         target = self.y_true
@@ -476,7 +446,6 @@ class RecorderMeter_matrix(object):
         # im_re_label.transpose()
         y_pred = im_pre_label.flatten()
         im_pre_label.transpose()
-
 
 
 class RecorderMeter_loss(object):
@@ -497,7 +466,6 @@ class RecorderMeter_loss(object):
         self.epoch_losses[idx, 2] = train_loss_3
         self.epoch_losses[idx, 3] = train_loss_4
 
-
         #self.epoch_accuracy[idx, 0] = train_acc
         #self.epoch_accuracy[idx, 1] = val_acc
         self.current_epoch = idx + 1
@@ -506,7 +474,7 @@ class RecorderMeter_loss(object):
         title = 'training losses curve'
         dpi = 80
         width, height = 1800, 1600
-        legend_fontsize = 35
+        legend_fontsize = 24
         figsize = width / float(dpi), height / float(dpi)
 
         fig = plt.figure(figsize=figsize)
@@ -514,15 +482,15 @@ class RecorderMeter_loss(object):
         y_axis = np.zeros(self.total_epoch)
 
         plt.xlim(0, self.total_epoch)
-        plt.ylim(0, 0.3)
-        interval_y = 0.02
-        interval_x = 10
-        plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x), fontsize=15)
-        plt.yticks(np.arange(0, 0.3 + interval_y, interval_y), fontsize=15)
+        plt.ylim(0, 2.0)
+        interval_y = 0.1
+        interval_x = 2
+        plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x))
+        plt.yticks(np.arange(0, 2.0 + interval_y, interval_y))
         plt.grid()
-        plt.title(title, fontsize=40)
-        plt.xlabel('epoch', fontsize=35)
-        plt.ylabel('loss', fontsize=35)
+        plt.title(title, fontsize=26)
+        plt.xlabel('epoch', fontsize=20)
+        plt.ylabel('loss', fontsize=20)
 
         y_axis[:] = self.epoch_losses[:, 0]
         plt.plot(x_axis, y_axis, color='r', linestyle='-', label='loss_base_a', lw=3)
@@ -540,9 +508,7 @@ class RecorderMeter_loss(object):
         plt.plot(x_axis, y_axis, color='y', linestyle='-', label='loss_cross_p', lw=3)
         plt.legend(loc=1, fontsize=legend_fontsize)
 
-        #y_axis[:] = self.epoch_losses[:, 4]
-        #plt.plot(x_axis, y_axis, color='k', linestyle=':', label='train_loss_avg', lw=2)
-        #plt.legend(loc=1, fontsize=legend_fontsize)
+
 
 
         if save_path is not None:
