@@ -34,15 +34,15 @@ Compared to methods that introduce additional landmark information, our method a
 We provide the checkpoints with training logs in each dataset. A small portion of the checkpoints that were trained using the old version of the code are currently not provided due to naming compatibility issues with network layers. ‡ means pre-trained on the AffectNet-8.
 dataset | Model | Acc. | Checkpoint & Log  
 --- |:---:|:---:|:---:|
-RAF-DB | DCS | 92.57 | [link](https://drive.google.com/file/d/1yPoWxsWnjyfT0Ymca4TwNmeNqVmz8GSC/view?usp=sharing)
-RAF-DB | QCS | 92.50 | [link](https://drive.google.com/file/d/1wZ5EvuZWjNpJcB009jjKSxGZ2_y1hiwd/view?usp=sharing)
+RAF-DB | DCS | 92.57 | [link](https://drive.google.com/drive/folders/1vv1WtDHj5DGDXFVt--_8NBxkAp8VF_73?usp=sharing)
+RAF-DB | QCS | 92.50 | [link](https://drive.google.com/drive/folders/1enyzfD1G8HPSPF1Tu6JkgMuirrKQs_mE?usp=sharing)
 RAF-DB | QCS‡ | 92.83 | [link](https://drive.google.com/drive/folders/1b25WkmbEqjC9dKsjIrGKUCxpywINjk5e?usp=sharing/)
 FERPlus | DCS | 91.41 | [link](https://drive.google.com/drive/folders/1UoQ4xZYDGc0cooQd7BzhDfb58e3wwnjO?usp=sharing)
 FERPlus | QCS | 91.41 | [link](https://drive.google.com/drive/folders/19O9BjP7Lhd1DX9r8-RxSmvO1aAUQHoBO?usp=sharing)
 FERPlus | QCS‡ | 91.79 | [link](https://drive.google.com/drive/folders/15jqH56e2dVtJx0oPzzcAmvaDAFa0rc01?usp=sharing)
-AffectNet-7 | DCS | 67.66 | [link](https://drive.google.com/file/d/1d5yOAEMNwNY3gTC-MRBXCrBuMYN3_Tsa/view?usp=sharing)
-AffectNet-7 | QCS | 67.94 | [link](https://drive.google.com/file/d/1XWf0q8wiJz840_ArXURFbv2KfdzVYwEV/view?usp=sharing)
-AffectNet-8 | DCS | 64.40 |
+AffectNet-7 | DCS | 67.66 | [link](https://drive.google.com/drive/folders/1ch6144M9HuEbX9tSB0XrYbYxzNfuCZ0u?usp=sharing)
+AffectNet-7 | QCS | 67.94 | [link](https://drive.google.com/drive/folders/1fo9iyz6qLotOSUUCoGllGN-DiPqlHfp6?usp=sharing)
+AffectNet-8 | DCS | 64.40 | [link](https://drive.google.com/drive/folders/1_kXBuZxYXkHOQxUaUx12_oSyKoLU5puM?usp=sharing)
 AffectNet-8 | QCS | 64.30 | [link](https://drive.google.com/drive/folders/1WFbisNzL-YqqMNSN0sq8vIaXYuh4_1Xm?usp=sharing/)
 
 ## Training
