@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 import torch.utils.data
 import torchvision
+from collections import Counter
 
 
 class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
@@ -29,7 +30,7 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
         # define custom callback
         self.callback_get_label = callback_get_label
 
-        self.num_samples = len(dataset) // 8
+        self.num_samples = len(dataset)  // 12
         # if num_samples is not provided, draw `len(indices)` samples in each iteration
         #self.num_samples = len(self.indices) if num_samples is None else num_samples
 
@@ -45,6 +46,7 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
 
         self.weights = torch.DoubleTensor(weights.to_list())
         self.weights = self.weights / self.weights.sum()
+
 
 
     def _get_labels(self, dataset):
