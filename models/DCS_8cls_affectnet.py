@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from .ir50 import Backbone
-from .vit_model_7cls import VisionTransformer, PatchEmbed
+from .vit_model_8cls import VisionTransformer, PatchEmbed
 from timm.models.layers import trunc_normal_, DropPath
 from thop import profile
 from utils import *
@@ -74,31 +74,31 @@ class CrossAttention(nn.Module):
     def forward(self, x_a, x_p):
         B, N, C = x_a.shape
 
-        x_a = self.norm1(x_a)
-        x_p = self.norm1(x_p)
+        x_a_n1 = self.norm1(x_a)
+        x_p_n1 = self.norm1(x_p)
 
-        qkv1 = self.proj(x_a).reshape(B, N, 2, C).permute(2, 0, 1, 3)
+        qkv1 = self.proj(x_a_n1).reshape(B, N, 2, C).permute(2, 0, 1, 3)
         K1, V1 = qkv1[0], qkv1[1]
 
-        qkv2 = self.proj(x_p).reshape(B, N, 2, C).permute(2, 0, 1, 3)
+        qkv2 = self.proj(x_p_n1).reshape(B, N, 2, C).permute(2, 0, 1, 3)
         Q2, V2 = qkv2[0], qkv2[1]
 
-        cross_map1, cross_map2 = Attn_DCS_S(K1, Q2)  # B WH WH # torch.Size([64, 49, 49])
+        cross_map1, cross_map2 = Attn_DCS_S(K1, Q2)  # B 3*WH 3*WH  # torch.Size([64, 49, 49])
 
         cross_map1 = torch.reshape(cross_map1, shape=(B, N, 1))
         attn_a = cross_map1 * V1  # B N C # torch.Size([64, 49, 768])
         x_a = x_a + attn_a
 
-        x_a = self.norm2(x_a)
-        attn_a = self.mlp(x_a)
+        x_a_n2 = self.norm2(x_a)
+        attn_a = self.mlp(x_a_n2)
         attn_a = x_a + attn_a
 
         cross_map2 = torch.reshape(cross_map2, shape=(B, N, 1))
         attn_p = cross_map2 * V2  # B N C
         x_p = x_p + attn_p
 
-        x_p = self.norm2(x_p)
-        attn_p = self.mlp(x_p)
+        x_p_n2 = self.norm2(x_p)
+        attn_p = self.mlp(x_p_n2)
         attn_p = x_p + attn_p
 
 
@@ -108,7 +108,7 @@ class CrossAttention(nn.Module):
 
 class Fusion(nn.Module):
 
-    def __init__(self, num_classes=7):
+    def __init__(self, num_classes=8):
         super().__init__()
 
         self.bilinear_pooling = Bilinear_Pooling()
@@ -128,15 +128,15 @@ class Fusion(nn.Module):
 
 
 class pyramid_trans_expr(nn.Module):
-    def __init__(self, img_size=224, num_classes=7, dims=[64, 128, 256], embed_dim=768):
+    def __init__(self, img_size=224, num_classes=8, dims=[64, 128, 256], embed_dim=768):
         super().__init__()
 
         self.img_size = img_size
 
         self.num_classes = num_classes
 
-        self.VIT_base = VisionTransformer(depth=2, drop_ratio=0, embed_dim=embed_dim)
-        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.4, embed_dim=embed_dim)
+        self.VIT_base = VisionTransformer(depth=2, drop_ratio=0.2, embed_dim=embed_dim)
+        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.5, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
         ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
@@ -152,13 +152,12 @@ class pyramid_trans_expr(nn.Module):
         self.embed_k = nn.Sequential(nn.Conv2d(dims[1], 768, kernel_size=3, stride=2, padding=1))
         self.embed_v = PatchEmbed(img_size=14, patch_size=14, in_c=256, embed_dim=768)
 
-
         self.cross_attention_1 = CrossAttention(embed_dim)
         self.cross_attention_2 = CrossAttention(embed_dim)
         self.cross_attention_3 = CrossAttention(embed_dim)
 
 
-        #self.fusion = Fusion(num_classes)
+        self.fusion = Fusion(num_classes)
 
 
     def forward(self, x_a, x_p):
@@ -199,7 +198,6 @@ class pyramid_trans_expr(nn.Module):
         x_p_0 = x_p_0 + attn_p_o
         out_a, _ = self.VIT_cross(x_a_0)
         out_p, _ = self.VIT_cross(x_p_0)
-
         #out_a, out_p = self.fusion(x_a_0, x_p_0, attn_a_o, attn_p_o)
 
 

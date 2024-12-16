@@ -99,7 +99,7 @@ class CrossAttention(nn.Module):
 
         ############################################
         cross_map1 = torch.reshape(cross_map1, shape=(B, N, 1))
-        attn_a = cross_map1 * V1  # B N C # torch.Size([64, 147, 768])
+        attn_a = cross_map1 * V1  # B N C # torch.Size([64, 49, 768])
         x_a = x_a + attn_a
 
         cross_map2 = torch.reshape(cross_map2, shape=(B, N, 1))
@@ -168,7 +168,7 @@ class pyramid_trans_expr(nn.Module):
         self.num_classes = num_classes
 
         self.VIT_base = VisionTransformer(depth=2, drop_ratio=0, embed_dim=embed_dim)
-        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.3, embed_dim=embed_dim)
+        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
         ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)

@@ -84,10 +84,10 @@ class CrossAttention(nn.Module):
         qkv2 = self.proj(x_p_n1).reshape(B, N, 2, C).permute(2, 0, 1, 3)
         Q2, V2 = qkv2[0], qkv2[1]
 
-        cross_map1, cross_map2 = Attn_DCS_S(K1, Q2)  # B 3*WH 3*WH # torch.Size([64, 147, 147])  # torch.Size([64, 49, 49])
+        cross_map1, cross_map2 = Attn_DCS_S(K1, Q2)  # B 3*WH 3*WH # torch.Size([64, 49, 49])
 
         cross_map1 = torch.reshape(cross_map1, shape=(B, N, 1))
-        attn_a = cross_map1 * V1  # B N C # torch.Size([64, 147, 768])
+        attn_a = cross_map1 * V1  # B N C # torch.Size([64, 49, 768])
         x_a = x_a + attn_a
 
         x_a_n2 = self.norm2(x_a)
@@ -136,11 +136,12 @@ class pyramid_trans_expr(nn.Module):
 
         self.num_classes = num_classes
 
-        self.VIT_base = VisionTransformer(depth=2, embed_dim=embed_dim)
-        self.VIT_cross = VisionTransformer(depth=1, embed_dim=embed_dim)
+        self.VIT_base = VisionTransformer(depth=2, drop_ratio=0, embed_dim=embed_dim)
+        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.2, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
         ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
+
 
         self.ir_back = load_pretrained_weights(self.ir_back, ir_checkpoint)
 

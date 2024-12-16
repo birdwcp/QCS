@@ -84,15 +84,18 @@ class CrossAttention(nn.Module):
         Q2, V2 = qkv2[0], qkv2[1]
 
         cross_map1, cross_map2 = Attn_DCS_S(K1, Q2)  # B WH WH # # torch.Size([64, 49, 49])
+        #cross_map1, cross_map2 = Attn_HW(K1, Q2)
 
+        #attn_a = cross_map1 @ V2
         cross_map1 = torch.reshape(cross_map1, shape=(B, N, 1))
-        attn_a = cross_map1 * V1  # B N C # torch.Size([64, 147, 768])
+        attn_a = cross_map1 * V1  # B N C # torch.Size([64, 49, 768])
         x_a = x_a + attn_a
 
         x_a = self.norm2(x_a)
         attn_a = self.mlp(x_a)
         attn_a = x_a + attn_a
 
+        #attn_p = cross_map2 @ V1
         cross_map2 = torch.reshape(cross_map2, shape=(B, N, 1))
         attn_p = cross_map2 * V2  # B N C
         x_p = x_p + attn_p
@@ -135,8 +138,8 @@ class pyramid_trans_expr(nn.Module):
 
         self.num_classes = num_classes
 
-        self.VIT_base = VisionTransformer(depth=2, embed_dim=embed_dim)
-        self.VIT_cross = VisionTransformer(depth=1, embed_dim=embed_dim)
+        self.VIT_base = VisionTransformer(depth=2, drop_ratio=0, embed_dim=embed_dim)
+        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.2, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
         ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
