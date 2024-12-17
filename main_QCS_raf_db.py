@@ -516,13 +516,13 @@ class RecorderMeter_loss(object):
 
         plt.xlim(0, self.total_epoch)
         plt.ylim(0, 0.3)
-        interval_y = 0.005
+        interval_y = 0.015
         interval_x = 10
         plt.xticks(np.arange(0, self.total_epoch + interval_x, interval_x), fontsize=15)
         plt.yticks(np.arange(0, 0.3 + interval_y, interval_y), fontsize=15)
         plt.grid()
         plt.title(title, fontsize=40)
-        plt.xlabel('the training epoch', fontsize=35)
+        plt.xlabel('epoch', fontsize=35)
         plt.ylabel('loss', fontsize=35)
 
         y_axis[:] = self.epoch_losses[:, 0]
