@@ -36,10 +36,10 @@ dataset | Model | Acc. | Checkpoint & Log
 --- |:---:|:---:|:---:|
 RAF-DB | DCS | 92.57 | [link](https://drive.google.com/drive/folders/1vv1WtDHj5DGDXFVt--_8NBxkAp8VF_73?usp=sharing)
 RAF-DB | QCS | 92.50 | [link](https://drive.google.com/drive/folders/1enyzfD1G8HPSPF1Tu6JkgMuirrKQs_mE?usp=sharing)
-RAF-DB | QCS‡ | 92.83 | [link](https://drive.google.com/drive/folders/1b25WkmbEqjC9dKsjIrGKUCxpywINjk5e?usp=sharing/)
+RAF-DB | QCS‡ | 93.02 | [link](https://drive.google.com/drive/folders/1b25WkmbEqjC9dKsjIrGKUCxpywINjk5e?usp=sharing/)
 FERPlus | DCS | 91.41 | [link](https://drive.google.com/drive/folders/1UoQ4xZYDGc0cooQd7BzhDfb58e3wwnjO?usp=sharing)
 FERPlus | QCS | 91.41 | [link](https://drive.google.com/drive/folders/19O9BjP7Lhd1DX9r8-RxSmvO1aAUQHoBO?usp=sharing)
-FERPlus | QCS‡ | 91.79 | [link](https://drive.google.com/drive/folders/15jqH56e2dVtJx0oPzzcAmvaDAFa0rc01?usp=sharing)
+FERPlus | QCS‡ | 91.85 | [link](https://drive.google.com/drive/folders/15jqH56e2dVtJx0oPzzcAmvaDAFa0rc01?usp=sharing)
 AffectNet-7 | DCS | 67.66 | [link](https://drive.google.com/drive/folders/1ch6144M9HuEbX9tSB0XrYbYxzNfuCZ0u?usp=sharing)
 AffectNet-7 | QCS | 67.94 | [link](https://drive.google.com/drive/folders/1fo9iyz6qLotOSUUCoGllGN-DiPqlHfp6?usp=sharing)
 AffectNet-8 | DCS | 64.40 | [link](https://drive.google.com/drive/folders/1_kXBuZxYXkHOQxUaUx12_oSyKoLU5puM?usp=sharing)
