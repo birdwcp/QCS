@@ -139,7 +139,7 @@ class pyramid_trans_expr(nn.Module):
         self.num_classes = num_classes
 
         self.VIT_base = VisionTransformer(depth=2, drop_ratio=0, embed_dim=embed_dim)
-        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.2, embed_dim=embed_dim)
+        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
         ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
