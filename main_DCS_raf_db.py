@@ -109,16 +109,14 @@ def main():
     # Data loading code
 
     train_root, test_root, train_pd, test_pd, cls_num = config(dataset=args.dataset)
-    '''
+    
     data_transforms = {
         'train': transforms.Compose([transforms.Resize((224, 224)),
             transforms.RandomHorizontalFlip(),
-            #transforms.RandomCrop((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.RandomErasing(scale=(0.02, 0.1))]),
         'test': transforms.Compose([transforms.Resize((224, 224)),
-            #transforms.CenterCrop((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]),
     }
@@ -138,7 +136,7 @@ def main():
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]),
     }
-
+    '''
     train_dataset = Dataset(train_root, train_pd, train=True, transform=data_transforms['train'], num_positive=1)
     test_dataset = Dataset(test_root, test_pd, train=False, transform=data_transforms['test'])
 
