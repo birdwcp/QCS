@@ -1,5 +1,5 @@
-#  QCS:Feature Refining from Quadruplet Cross Similarity for Facial Expression Recognition [link]([https://drive.google.com/drive/folders/1vv1WtDHj5DGDXFVt--_8NBxkAp8VF_73?usp=sharing](https://arxiv.org/abs/2411.01988))
-By Chengpeng Wang, Li Chen, Lili Wang, Zhaofan Li, Xuebin Lv. AAAI 2025.
+#  QCS:Feature Refining from Quadruplet Cross Similarity for Facial Expression Recognition
+By Chengpeng Wang, Li Chen, Lili Wang, Zhaofan Li, Xuebin Lv. AAAI 2025. [link](https://arxiv.org/abs/2411.01988)
 
 This is a PyTorch implementation of the paper QCS:Feature Refining from Quadruplet Cross Similarity for Facial Expression Recognition, based on [POSTER++](https://github.com/Talented-Q/POSTER_V2).
 
