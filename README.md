@@ -1,6 +1,6 @@
 #  QCS:Feature Refining from Quadruplet Cross Similarity for Facial Expression Recognition
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/qcs-feature-refining-from-quadruplet-cross/facial-expression-recognition-on-fer-1)](https://paperswithcode.com/sota/facial-expression-recognition-on-fer-1?p=qcs-feature-refining-from-quadruplet-cross)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/qcs-feature-refining-from-quadruplet-cross/facial-expression-recognition-on-raf-db)](https://paperswithcode.com/sota/facial-expression-recognition-on-raf-db?p=qcs-feature-refining-from-quadruplet-cross)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/qcs-feature-refining-from-quadruplet-cross/facial-expression-recognition-on-fer-1)](https://paperswithcode.com/sota/facial-expression-recognition-on-fer-1?p=qcs-feature-refining-from-quadruplet-cross)<br>
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/qcs-feature-refining-from-quadruplet-cross/facial-expression-recognition-on-raf-db)](https://paperswithcode.com/sota/facial-expression-recognition-on-raf-db?p=qcs-feature-refining-from-quadruplet-cross)<br>
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/qcs-feature-refining-from-quadruplet-cross/facial-expression-recognition-on-affectnet)](https://paperswithcode.com/sota/facial-expression-recognition-on-affectnet?p=qcs-feature-refining-from-quadruplet-cross)
 
 Chengpeng Wang, Li Chen, Lili Wang, Zhaofan Li, Xuebin Lv. AAAI 2025. [[arXiv](https://arxiv.org/abs/2411.01988)]
