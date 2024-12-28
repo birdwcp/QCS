@@ -17,18 +17,18 @@ def config(dataset):
     if dataset == 'AffectNet-7':
         train_root = '../datas/AffectNet/Manually_trainval_croped'
         test_root = '../datas/AffectNet/Manually_trainval_croped'
-        train_pd = pd.read_csv("../datas/AffectNet/training-cls7-v7.txt", sep=" ", header=None,
+        train_pd = pd.read_csv("../datas/AffectNet/affectnet_training-cls7-v7.txt", sep=" ", header=None,
                                names=['ImageName', 'label'], engine='python')
-        test_pd = pd.read_csv("../datas/AffectNet/validation-cls7.txt", sep=" ", header=None,
+        test_pd = pd.read_csv("../datas/AffectNet/affectnet_validation-cls7.txt", sep=" ", header=None,
                               names=['ImageName', 'label'], engine='python')
         cls_num = 7
 
     if dataset == 'AffectNet-8':
         train_root = '../datas/AffectNet/Manually_trainval_croped'
         test_root = '../datas/AffectNet/Manually_trainval_croped'
-        train_pd = pd.read_csv("../datas/AffectNet/training-cls8-v7.txt", sep=" ", header=None,
+        train_pd = pd.read_csv("../datas/AffectNet/affectnet_training-cls8-v7.txt", sep=" ", header=None,
                                names=['ImageName', 'label'], engine='python')
-        test_pd = pd.read_csv("../datas/AffectNet/validation-cls8.txt", sep=" ", header=None,
+        test_pd = pd.read_csv("../datas/AffectNet/affectnet_validation-cls8.txt", sep=" ", header=None,
                               names=['ImageName', 'label'], engine='python')
         cls_num = 8
 
