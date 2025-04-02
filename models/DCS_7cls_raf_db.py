@@ -139,7 +139,7 @@ class pyramid_trans_expr(nn.Module):
         self.num_classes = num_classes
 
         self.VIT_base = VisionTransformer(depth=2, drop_ratio=0, embed_dim=embed_dim)
-        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0, embed_dim=embed_dim)
+        self.VIT_cross = VisionTransformer(depth=1, drop_ratio=0.2, embed_dim=embed_dim)
 
         self.ir_back = Backbone(50, 0.0, 'ir')
         ir_checkpoint = torch.load(r'.\models\pretrain\ir50.pth', map_location=lambda storage, loc: storage)
@@ -150,10 +150,10 @@ class pyramid_trans_expr(nn.Module):
         self.conv2 = nn.Conv2d(in_channels=dims[1], out_channels=dims[1], kernel_size=3, stride=2, padding=1)
         self.conv3 = nn.Conv2d(in_channels=dims[2], out_channels=dims[2], kernel_size=3, stride=2, padding=1)
 
-        self.embed_q = nn.Sequential(nn.Conv2d(dims[0], 768, kernel_size=3, stride=2, padding=1),
+        self.embed_1 = nn.Sequential(nn.Conv2d(dims[0], 768, kernel_size=3, stride=2, padding=1),
                                      nn.Conv2d(768, 768, kernel_size=3, stride=2, padding=1))
-        self.embed_k = nn.Sequential(nn.Conv2d(dims[1], 768, kernel_size=3, stride=2, padding=1))
-        self.embed_v = PatchEmbed(img_size=14, patch_size=14, in_c=256, embed_dim=768)
+        self.embed_2 = nn.Sequential(nn.Conv2d(dims[1], 768, kernel_size=3, stride=2, padding=1))
+        self.embed_3 = PatchEmbed(img_size=14, patch_size=14, in_c=256, embed_dim=768)
 
         self.cross_attention_1 = CrossAttention(embed_dim)
         self.cross_attention_2 = CrossAttention(embed_dim)
@@ -169,7 +169,7 @@ class pyramid_trans_expr(nn.Module):
         x_a_ir1, x_a_ir2, x_a_ir3 = self.ir_back(x_a)
         x_a_ir1, x_a_ir2, x_a_ir3 = self.conv1(x_a_ir1), self.conv2(x_a_ir2), self.conv3(x_a_ir3)
         #torch.Size([64, 64, 28, 28]) torch.Size([64, 128, 14, 14]) torch.Size([64, 256, 7, 7])
-        x_a_o1, x_a_o2, x_a_o3 = self.embed_q(x_a_ir1).flatten(2).transpose(1, 2), self.embed_k(x_a_ir2).flatten(2).transpose(1, 2), self.embed_v(x_a_ir3)
+        x_a_o1, x_a_o2, x_a_o3 = self.embed_1(x_a_ir1).flatten(2).transpose(1, 2), self.embed_2(x_a_ir2).flatten(2).transpose(1, 2), self.embed_3(x_a_ir3)
         #torch.Size([64, 49, 768]) torch.Size([64, 49, 768]) torch.Size([64, 49, 768])
         x_a_o = torch.cat([x_a_o1, x_a_o2, x_a_o3], dim=1)
         x_a, x_a_0 = self.VIT_base(x_a_o)
@@ -180,7 +180,7 @@ class pyramid_trans_expr(nn.Module):
         '''----------------- positive ----------------'''
         x_p_ir1, x_p_ir2, x_p_ir3 = self.ir_back(x_p)
         x_p_ir1, x_p_ir2, x_p_ir3 = self.conv1(x_p_ir1), self.conv2(x_p_ir2), self.conv3(x_p_ir3)
-        x_p_o1, x_p_o2, x_p_o3 = self.embed_q(x_p_ir1).flatten(2).transpose(1, 2), self.embed_k(x_p_ir2).flatten(2).transpose(1, 2), self.embed_v(x_p_ir3)
+        x_p_o1, x_p_o2, x_p_o3 = self.embed_1(x_p_ir1).flatten(2).transpose(1, 2), self.embed_2(x_p_ir2).flatten(2).transpose(1, 2), self.embed_3(x_p_ir3)
         x_p_o = torch.cat([x_p_o1, x_p_o2, x_p_o3], dim=1)
         x_p, x_p_0 = self.VIT_base(x_p_o)
 
