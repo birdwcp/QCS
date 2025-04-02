@@ -149,8 +149,8 @@ class pyramid_trans_expr(nn.Module):
 
         self.embed_1 = nn.Sequential(nn.Conv2d(dims[0], 768, kernel_size=3, stride=2, padding=1),
                                      nn.Conv2d(768, 768, kernel_size=3, stride=2, padding=1))
-        self.embed_k = nn.Sequential(nn.Conv2d(dims[1], 768, kernel_size=3, stride=2, padding=1))
-        self.embed_v = PatchEmbed(img_size=14, patch_size=14, in_c=256, embed_dim=768)
+        self.embed_2 = nn.Sequential(nn.Conv2d(dims[1], 768, kernel_size=3, stride=2, padding=1))
+        self.embed_3 = PatchEmbed(img_size=14, patch_size=14, in_c=256, embed_dim=768)
 
 
         self.cross_attention_1 = CrossAttention(embed_dim)
