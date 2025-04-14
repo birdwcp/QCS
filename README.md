@@ -3,7 +3,7 @@
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/qcs-feature-refining-from-quadruplet-cross/facial-expression-recognition-on-raf-db)](https://paperswithcode.com/sota/facial-expression-recognition-on-raf-db?p=qcs-feature-refining-from-quadruplet-cross)<br>
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/qcs-feature-refining-from-quadruplet-cross/facial-expression-recognition-on-affectnet)](https://paperswithcode.com/sota/facial-expression-recognition-on-affectnet?p=qcs-feature-refining-from-quadruplet-cross)
 
-Chengpeng Wang, Li Chen, Lili Wang, Zhaofan Li, Xuebin Lv. AAAI 2025. [[arXiv](https://arxiv.org/abs/2411.01988)]
+Chengpeng Wang, Li Chen, Lili Wang, Zhaofan Li, Xuebin Lv. AAAI 2025. [[arXiv](https://arxiv.org/abs/2411.01988)] [[pdf](https://ojs.aaai.org/index.php/AAAI/article/view/32814/34969)] 
 
 This is a PyTorch implementation of the paper QCS:Feature Refining from Quadruplet Cross Similarity for Facial Expression Recognition, based on [POSTER++](https://github.com/Talented-Q/POSTER_V2).
 
@@ -77,7 +77,8 @@ python main_*_*.py --evaluate path/to/checkpoint
 @inproceedings{Wang2024QCS,
 	title={QCS:Feature Refining from Quadruplet Cross Similarity for Facial Expression Recognition},
 	author={Chengpeng Wang and Li Chen and Lili Wang and Zhaofan Li and Xuebin Lv},
-	booktitle={arXiv preprint arXiv:2411.01988},
-	year={2024}
+	booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+	pages={7563-7572},
+	year={2025}
 }
 ```
