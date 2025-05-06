@@ -82,4 +82,4 @@ python main_*_*.py --evaluate path/to/checkpoint
 	year={2025}
 }
 ```
-<script type='text/javascript' id='mapmyvisitors' src='https://mapmyvisitors.com/map.js?cl=ffffff&w=a&t=n&d=qkzeGajNgxNZjrFHOKUG39ZfHYsenli2wvkkoTHSXfk&co=2059e2'></script>
+<a href='https://mapmyvisitors.com/web/1by7z'  title='Visit tracker'><img src='https://mapmyvisitors.com/map.png?cl=ffffff&w=a&t=n&d=qkzeGajNgxNZjrFHOKUG39ZfHYsenli2wvkkoTHSXfk&co=2059e2'/></a>
